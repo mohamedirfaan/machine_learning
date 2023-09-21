@@ -1,0 +1,31 @@
+{% load static %}
+<html>
+    <head>
+        <title>Search result</title>
+        <link rel="stylesheet" href="{% static 'index.css' %}">
+    </head>
+    <body>
+        <h1>Search result page</h1>
+        {% if user.is_authenticated %}
+        {% for x in res %}
+        <div class="content">
+            
+                <img class="result" src="{{x.profile_pic.url}}" alt="nat availabe">
+                <br>
+                Name : {{x.username}}
+                <br>
+                Age : {{x.email}}
+            
+            {% ifequal currentuser.id x.id %}
+                <h1>Change password</h1><br>
+                <h2>Update profile</h2><br>
+                <h3>friends</h3>
+            {% else %}
+                <h3>Send friend request</h3>
+                <a class="links" href="friend-request">Add</a>
+            {% endifequal %}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </body>
+</html>

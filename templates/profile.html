@@ -1,0 +1,141 @@
+{% load static %}
+{% include 'send_friend_request.html' %}
+<html>
+    <head>
+        <title>Matrimony</title>
+        <link rel="stylesheet" href="{% static 'profile.css' %}">
+        
+          
+    </head>
+    <body>
+        <input type="hidden" id="csrf_token" value="{% csrf_token %}">
+        <div id="friend-overlay" class="friend-overlay">
+          <div class="f-modal">
+            <h2>Friends</h2>
+            <button  class="close-friends" id="close-friends">Close</button>
+            {% for x in friendsindeed %}
+            <a href="{{x.id}}" class="profile">
+              <div class="requester">
+                <p>{{ x.username }}</p>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal">
+              <!-- Modal content goes here -->
+              <h2>Requests</h2>
+              <button  class="close-modal" id="close-modal">Close</button>
+              {% for x in request %}
+              <a href="{{x.id}}" class="profile">Profile
+                <div class="requester">
+                  <p>{{ x.username }}</p>
+                </div>
+              </a>
+              <button class="accept" onclick="acceptFriendRequest('{{ x.id }}')">a</button>
+              <button class="decline">d</button>
+
+              {% endfor %}  
+            </div>
+          </div>
+          
+        <header class="header">
+            <h1>PROFILE of {{usera.username}}</h1>
+            <nav class="navbar">
+                {% if user.is_authenticated %}
+                    <a class="links" href="logout">Logout</a>
+                {% else %}
+                    <a class="links" href="login">Login</a>
+                {% endif %}
+                {% if user.is_authenticated and condition%}
+                        <img class="user" src="{{usera.profile_pic.url}}" alt="nat availabe" width="50px" height="50px" object-fit="cover">
+                    <a href="profile" class="profile">Profile</a>
+                {% endif %}
+            </nav>
+        </header>
+        {% if user.is_authenticated %}
+        <div class="my-element">
+
+        </div>
+        <div class="content">
+                <div class="image">
+                    <img class="img" src="{{usera.profile_pic.url}}" alt="nat availabe" height="250" width="250px" object-fit="cover">
+                </div>
+                <div class="details">
+                    <h2>Name : {{usera.username}} <br>
+                    email : {{usera.email}} <br> </h2>
+                </div>
+                
+                
+            {% if is_self %}
+                <div class="friends-count">
+                  <button  id="friend-modal" class="fri" >Friends</button>
+                      <p class="counter" >{{ frndcount }}</p>
+                </div>
+                  <h1 class="changeprofile">Change password</h1><br>
+                  <h2 class="changeprofile1">Update profile</h2><br>
+                <div class="requestee">
+                  <button id="open-modal" class="request-count">Requests</button>
+                  <p class="requestcounter">{{ requestcount }}</p>
+                </div>
+            {% elif is_friend %}
+                <div class="friends-count">
+                  <p >{{ frndcount }}Friends</p>
+                </div>
+                <button onclick="initiatemessage('{{ usera.id }}')" >message him/her</button>
+            {% else %}
+                <div class="friends-count">
+                  <p >{{ frndcount }}Friends</p>
+                </div>
+                {% if is_request %}
+                <a class="links" id="mylink" href="">Request sent</a>
+                {% else %}
+                  <button class="links" onclick="sendFriendRequest('{{ usera.id }}')">Send request</button>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var openModalButton = document.getElementById('open-modal');
+          var openFriendsButton = document.getElementById('friend-modal');
+          var modalOverlay = document.getElementById('modal-overlay');
+          var FreindOverlay = document.getElementById('friend-overlay');
+          var closeModalButton = document.getElementById('close-modal');
+          var closeFriendsModal = document.getElementById('close-friends');
+          function createwindow(){
+            modalOverlay.style.display = 'flex';
+          }
+          function createFriendWindow(){
+            FreindOverlay.style.display='flex';
+          }
+          openModalButton.addEventListener('click', function() {
+            localStorage.setItem('windowCreated', 'true');
+            createwindow();
+          });
+          openFriendsButton.addEventListener('click',function(){
+            localStorage.setItem('FreindwindowCreated', 'true');
+            createFriendWindow();
+          })
+          const friendwindow=localStorage.getItem('FriendwindowCreated');
+          if(friendwindow=='true'){
+            createFriendWindow();
+          }
+          const windowCreated = localStorage.getItem('windowCreated');
+          if (windowCreated=='true') {
+            createwindow();
+          }
+          closeModalButton.addEventListener('click', function() {
+            modalOverlay.style.display = 'none';
+            localStorage.removeItem('windowCreated');
+          });
+          closeFriendsModal.addEventListener('click',function(){
+            FreindOverlay.style.display='none';
+            localStorage.removeItem('FriendwindowCreated');
+          })
+        });
+        // Update a specific element with the response content
+      </script>
+</html>

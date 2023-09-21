@@ -1,0 +1,389 @@
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    //const socket = new WebSocket('ws://127.0.0.1:8000/ws/socket-interface/');
+    let socket;
+    //socket = new WebSocket(`ws://127.0.0.1:8000/ws/socket-interface/`);
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log("entered funcition")
+			console.log("in")
+			console.log(localStorage.getItem('menuoverlay'))
+			var createFriendButton = document.getElementById('create-room');
+			var modalOverlay = document.getElementById('modal-overlay');
+			var closeModalButton = document.getElementById('close-modal');
+			var createButton = document.getElementById('create');
+			//var requesterButton = document.getElementById('requester');
+			function createwindow(){
+			  modalOverlay.style.display = 'flex';
+			}
+			createFriendButton.addEventListener('click', function() {
+				console.log("clicked")
+			  localStorage.setItem('windowCreated', 'true');
+			  createwindow();
+			})
+			var name = document.getElementById('chat-room-name');
+			createButton.addEventListener('click',function(){
+                console.log("clicked");
+				console.log(name);
+				console.log(name.value);
+				createroom(name.value);
+			});
+			var requesterButtons = document.querySelectorAll('.requester');
+			requesterButtons.forEach(function(button) {
+				button.addEventListener('click', function() {
+					if (button.style.background == 'pink')
+						button.style.background = '';
+					else
+						button.style.background = 'pink';
+				});
+			});
+			closeModalButton.addEventListener('click', function() {
+			  modalOverlay.style.display = 'none';
+			  localStorage.removeItem('windowCreated');
+			});
+            var menuoverlaybutton = document.getElementById('menu-button');
+            var menuoverlay = document.getElementById('menu-overlay');
+        
+            document.addEventListener('click',function(event){
+                console.log("in");
+                post_photo_or_video=document.getElementById('id_post_or_video')
+                id_tags = document.getElementById('id_tags')
+                upload_photo_or_video=document.getElementById('upload_photo_or_video')
+
+                menuoverlaybutton1=document.getElementById('menu-button-image')
+                createRoom=document.getElementById('create-room')
+                searchbutton=document.getElementById('search-button');
+                searchoverlay=document.getElementById('search-overlay');
+                searchbuttonimage=document.getElementById('search-button-image');
+                var search = document.getElementById('search')
+
+                var post_overlay = document.getElementById('add-post-overlay')
+                var add_post_manager = document.getElementById('add-post-manager')
+                var add_post_button_image = document.getElementById('add-post-button-image')
+                var add_post_button = document.getElementById('add-post-button')
+                var homebuttonimage = document.getElementById('home-button-image')
+                var homebutton = document.getElementById('home-button')
+                console.log(event.target)
+                console.log(homebuttonimage)
+                if(event.target==menuoverlaybutton1||event.target==menuoverlaybutton)
+                {
+                    localStorage.setItem('menuoverlay','true')
+                    menuoverlay.style.display='flex';
+                }
+                else if(event.target==homebutton || event.target==homebuttonimage){
+                    console.log("redirecting")
+                    window.location.href='/index';
+                }
+                else if(event.target==upload_photo_or_video){
+                    console.log("inside if")
+                    const image = document.getElementById('id_post_or_video')
+                    console.log(image.files[0].name)
+                }
+                else if(event.target==add_post_button || event.target==add_post_button_image)
+                    post_overlay.style.display='flex';
+                else if(event.target==searchbutton || event.target==searchbuttonimage)
+                    searchoverlay.style.display='flex';
+                else if((event.target!=createRoom && event.target!=searchoverlay && event.target!=search &&
+                        event.target!=post_photo_or_video && event.target!=upload_photo_or_video && event.target!=add_post_manager &&
+                        event.target!=id_tags)){
+                    menuoverlay.style.display='none';
+                    localStorage.removeItem('menuoverlay')
+                    modalOverlay.style.display='none';
+                    searchoverlay.style.display='none';
+                }
+            })
+            //const csrfToken = document.getElementById('csrf_token').value;
+            //var roomid = document.getElementById('roomid').value;
+      });
+      function updateChatWindow(message){
+        const messageList = document.getElementById('message-list');
+        const newMessage = document.createElement('li');
+        newMessage.className="sending";
+        newMessage.id="sending"
+        newMessage.textContent = message;
+        newMessage.style.padding= '10px';
+        newMessage.style.borderRadius='10px';
+        newMessage.style.background= 'rgba(56, 56, 240, 0.842)';
+        newMessage.style.color= 'white';
+        newMessage.style.float= 'right';
+        newMessage.style.clear= 'both'; 
+        newMessage.style.position='relative';
+        newMessage.style.marginBottom= '10px';
+        messageList.appendChild(newMessage);
+      };
+      
+      async function sendWebSocketMessage(roomId, userid,is_room,is_private) {
+        const roomname = document.getElementById('roomname').value;
+        const messageInput = document.getElementById('messagetext');
+        const receiver = document.getElementById('receiver').value;
+        const message = messageInput.value;
+        messageInput.value=''
+    
+        // Wait for the WebSocket connection to be established
+        await new Promise((resolve) => {
+            if (socket.readyState === WebSocket.OPEN) {
+                resolve();
+            } else {
+                socket.onopen = resolve;
+            }
+        });
+    
+        // Send the message over the WebSocket connection
+        const data = {"message": message, "roomId": roomId, "userid": userid, 'roomname': roomname,'is_room':is_room,'is_private':is_private,'receiver':receiver};
+        socket.send(JSON.stringify(data));
+    };
+    
+    function remaining(socket){
+        socket.onopen = (event) => {
+            console.log('WebSocket connection opened:', event);
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const message = data.message;
+            console.log(message)
+            const messageList = document.getElementById('message-list');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = `${message}`;
+            messageList.appendChild(newMessage);
+        };
+
+        socket.onclose = (event) => {
+            console.log('WebSocket connection closed:', event);
+        };
+
+        socket.onerror = (event) => {
+            console.error('WebSocket error:', event);
+        };
+    };
+    function createsocket(roomname){
+        console.log("creating socket ")
+        console.log(roomname);
+        socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomname}/`)
+        remaining(socket)
+    }
+    function sendFriendRequest(id){
+        console.log("gonna get ajax")
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "receiver_user_id":id,
+        }
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'send-request' %}",
+            timeout:5000,
+            data:payload,
+            success:function(data){
+                if(data['response']=="friend request sent"){
+                    $('#result').text(payload['response']);
+                }
+                else if(data['response']!=null){
+                    alert(data['response'])
+                }
+                location.reload()
+            },
+            error:function(data){
+                alert("Something went wrong...")
+            },
+            complete:function(data){
+                //uiUpdataFunction()
+                //location.reload();
+            }
+            
+        })
+    }
+    
+    
+    function selectfriends(id){
+        console.log("gonna get ajax")
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "receiver_user_id":id,
+        }
+        var clickCounts = {};
+        console.log(clickCounts);
+        function selectfriends(id) {
+            if (!clickCounts.hasOwnProperty(id)) {
+                clickCounts[id] = 0;
+            }
+
+            clickCounts[id]++;
+
+            if (clickCounts[id] === 1) {
+                console.log('First click for id: ' + id);
+                // Call some function or perform actions for the first click (add=1)
+            } else if (clickCounts[id] === 2) {
+                console.log('Second click for id: ' + id);
+                // Call some function or perform actions for the second click (add=0)
+            }
+        }
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'select-friends' %}",
+            timeout:5000,
+            data:payload,
+            success:function(data){
+                if(data['response']=="friend request sent"){
+                    $('#result').text(payload['response']);
+                }
+                else if(data['response']!=null){
+                    alert(data['response'])
+                }
+                //location.reload()
+            },
+            error:function(data){
+                alert("Something went wrong...")
+            },
+            complete:function(data){
+                //uiUpdataFunction()
+                //location.reload();
+            }
+            
+        })
+    }
+    function createroom(name){
+        console.log("gonna get ajax")
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "chat_room_name":name,
+        }
+        var clickCounts = {};
+        console.log(clickCounts);
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'create-room' %}",
+            timeout:5000,
+            data:payload,
+            success:function(data){
+                if(data['response']=="friend request sent"){
+                    $('#result').text(payload['response']);
+                }
+                else if(data['response']!=null){
+                    alert(data['response'])
+                }
+                location.reload()
+            },
+            error:function(data){
+                alert("Something went wrong...")
+            },
+            complete:function(data){
+                //uiUpdataFunction()
+                //location.reload();
+            }
+            
+        })
+    }
+    function acceptFriendRequest(id){
+        console.log("accept friend request");
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "receiver_user_id":id,
+        }
+        payload['response']="",
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'accept-friend-request' %}",
+            data:payload,
+            success:function(response){
+                location.reload();
+                console.log(response)
+            },
+            error:function(){
+                console.log(response);
+            }
+        })
+    }
+    function initiatemessage(id){
+        console.log("message initiated ",id);
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "receiver_user_id":id,
+        }
+        payload['response']="",
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'initiatemessage' %}",
+            data:payload,
+            success:function(response){
+                location.reload();
+                console.log(response)
+            },
+            error:function(response){
+                console.log(response);
+            }
+        })
+    }
+    function sendmessage(id){
+        message=document.getElementById('messagetext')
+        console.log("send message");
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "room_id":id,
+            "message":message.value,
+        }
+        payload['response']=""
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'send-message' %}",
+            data:payload,
+            success:function(response){
+                console.log(message.value)
+                updateChatWindow(message.value)
+            },
+            error:function(){
+                console.log(response);
+            }
+        })
+    }
+    function fetchresult(name){
+        console.log("fetch result");
+        payload={
+            "csrfmiddlewaretoken":"{{ csrf_token }}",
+            "name":name,
+        }
+        payload['response']=""
+        $.ajax({
+            type:"POST",
+            dataType:"json",
+            url:"{% url 'searchresult' %}",
+            data:payload,
+            success:function(response){
+                console.log(response.search_result)
+                var search_overlay=document.getElementById('result')
+                contents_to_remove=document.querySelectorAll('.searchresult')
+                contents_to_remove.forEach(paragraph=>{
+                    paragraph.remove();
+                })
+                while(search_overlay.firstChild)
+                {
+                    search_overlay.removeChild(search_overlay.firstChild)
+                }
+                for(var i=0;i<response.search_result.length;i++)
+                {
+                    const result_tag = document.getElementById('result')
+                    const div_tag=document.createElement('div')
+                    const content = document.createElement('a')
+                    content.className='searchresult';
+                    content.href=`/profile/${response.search_result[i].id}`
+                    div_tag.className='profile-links'
+                    content.textContent=response.search_result[i].username
+                    div_tag.appendChild(content)
+                    search_overlay.appendChild(div_tag)
+                    result_tag.appendChild(div_tag)
+                    console.log(response.search_result[i].username)
+                }
+            },
+            error:function(response){
+                console.log(response);
+            }
+        })
+    }
+
+</script>
+

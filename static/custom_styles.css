@@ -1,0 +1,50 @@
+/* custom_styles.css */
+.custom-file-input {
+    display: inline-block;
+    width: 100%;
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+  
+  .custom-file-filename {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
+  .custom-file-button {
+    display: inline-block;
+    vertical-align: middle;
+    width: 150px; /* Adjust the width as needed */
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    cursor: pointer;
+  }
+  
+  .custom-file-button:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+  }
+  
+  .custom-file-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+  }
+  

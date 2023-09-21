@@ -1,0 +1,229 @@
+{% load static %}
+{% include 'send_friend_request.html' %}
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Message</title>
+		<link rel="stylesheet" href="{% static 'message.css' %}">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+	</head>
+	<body>
+		<div class="add-post-overlay" id="add-post-overlay">
+			<div class="add-post-manager" id="add-post-manager">
+				<div class="postimage">
+					
+				</div>
+				<form action="" method="post" enctype="multipart/form-data" autocomplete="off" >
+					{% csrf_token %}
+					<div class="posto">
+						{{ post_form.post_or_video }}
+					</div>
+					<div class="post_tags">
+						{{ post_form.tags }}
+					</div>
+					<button class="upload_photo_or_video" class="upload_photo_or_video" id="upload_photo_or_video" >Upload</button>
+				</form>
+			</div>
+		</div>
+		<div class="search-overlay" id="search-overlay">
+			<span></span>
+			<div>
+				<h1>search</h1>
+				<input class="search-field" type="text" name="search" id="search" placeholder="Enter a username">
+			</div>
+			<div class="result" id="result" >
+				<p>Result</p>
+			</div>
+		</div>
+		<div id="menu-overlay" class="menu-overlay">
+			<p>Menu</p>
+		</div>
+		<div class="header">
+			<div class="home">
+				<button id="home-button" class="home-button"> 
+					<i class="fas fa-home image-button" id="home-button-image" ></i> 
+				</button>
+			</div>
+			<div class="search">
+				<button class="search-button" id="search-button">
+					<i class="fas fa-search search-button" id="search-button-image"></i>
+				</button>
+			</div>
+			<div class="add-post">
+				<button class="add-post-button" id="add-post-button">
+					<i class="fas fa-plus" id="add-post-button-image"></i>
+				</button>
+			</div>
+			<div class="explore">
+				<button class="explore-button" id="explore-button">
+					<i class="fas fa-compass" class="explore-button-image" ></i>
+				</button>
+			</div>
+			<div class="menu">
+				<button id="menu-button" class="menu-button">
+					<i class="fas fa-bars bars" id="menu-button-image"></i>
+				</button>
+			</div>
+		</div>
+		<div id="modal-overlay" class="modal-overlay">
+            <div class="modal">
+				<h2>Create room</h2>
+              <button  id="close-modal" class="close-modal">Close</button>
+			  <br><br>
+			  <input id="chat-room-name" type="text" placeholder="Enter room name" required>
+			  <div class="friends-select" id="friends-select">
+				{% for x in friends %}
+					<button onclick="selectfriends('{{ x.id }}')" id="requester-{{ forloop.counter }}" class="requester">{{ x }}</button>
+				{% endfor %}
+				<button class="close-modal" id="create"> Create </button>
+			  </div>
+            </div>
+        </div>
+		<button id="create-room" class="create-room">Create Room</button>
+		<div class="userdetails">
+			<a class="contact-link" href="/profile/{{ currentuser.id }}" >{{ currentuser.username }}</a>
+			<h5 class="messageslabel">Messages</h5>
+			<button id="open-modal" class="requested-users">Requests</button>
+		</div>
+		<div class="contacts">
+			{% for i in rooms %}
+			<!--<div class="contact">-->
+				
+				<a class="contact" href="/message/room/{{ i.id }}" onclick="createsocket('{{ i.id }}')">
+					<img  class="room-details" src="{{ i.profile_pic.url }}" alt="not_found" >
+					{{ i.title }}
+				</a>
+			<!--</div>-->
+			{% endfor %}
+			{% for i in private_chatters %}
+			<!--<div class="contact">-->
+				<a class="contact" href="/message/chat/{{ i.id }}" onclick="createsocket('{{ i.id }}')">
+					{% ifequal request.user i.user %}
+					<img src="{{ i.title.profile_pic.url }}" alt="not_found">
+					{{ i.title }} <!--{{ i.id }} {{ i.title.id }}-->
+					{% else %}
+					<img src="{{ i.user.profile_pic.url }}" alt="not_found">
+					{{ i.user }} <!--{{ i.id }} {{ i.user.id }}-->
+					{% endifequal %}
+				</a>
+			<!--</div>-->
+			{% endfor %}
+		</div>
+		<div class="message-page-header">
+			<input type="hidden" id="roomid" value="{{ room_details.id }}">
+			<input type="hidden" id="roomname" value="{{ room_details.id }}">
+			{% if room_details %}
+				{% ifequal room_details.user request.user %}
+					<input type="hidden"  id="receiver" value="{{ room_details.title.id }}">
+					<div class="r-details">
+						<img class="room-details" src="{{ room_details.title.profile_pic.url }}" alt="not_found" style="height: 44px; width:44px; border-radius:22px;">
+						<div class="r-details-text">
+							<h2>{{ room_details.title }} {{ room_details.title.id }}</h2>
+						</div>
+					</div>
+				{% else %}
+					<input type="hidden"  id="receiver" value="{{ room_details.id }}">
+					<div class="r-details">
+						<img  class="room-details" src="{{ room_details.profile_pic.url }}" alt="" style="height: 44px; width:44px;border-radius:22px">
+						<div class="r-details-text">
+						<h2>{{ room_details.user }} {{ room_details.user.id }}</h2>
+						</div>
+					</div>
+				{% endifequal %}
+			{% endif %}
+			{% if room_details1 %}
+				<input type="hidden" readonly id="receiver" value="{{ room_details1.id }}">
+				<input type="hidden" id="roomid" value="{{ room_details1.id }}">
+				<input type="hidden" id="roomname" value="{{ room_details1.id }}">
+				<div class="r-details">
+					<img class="room-details" src="{{ room_details1.profile_pic.url }}" alt="not_found" style="height: 44px; width:44px; border-radius:22px;">
+					<div class="r-details-text">
+						<h2>{{ room_details1.title }} {{ room_details1.id }} {{ room_details1.title.id }}</h2>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+		<div class="message-page">				
+				<div id="chat-window">
+					<ul id="message-list" class="message-list">
+						{% if private_messages %}
+							{% for i in private_messages %}
+								{% ifequal i.message_sender.username currentuser.username %}
+									<li class="sending" id="sending">s{{ i.content }}</li> 
+								{% else %}
+									<li class="receiving" id="receiving">r{{ i.content }}</li>
+								{% endifequal %}
+							{% endfor %}
+						{% else %}
+							{% for i in room_messages %}
+								{% ifequal i.user currentuser %}
+								<li class="sending" id="sending">{{ i.content }}</li>
+								{% else %}
+								<li class="receiving" id="receiving">{{ i.content }}</li>
+								{% endifequal %}
+							{% endfor %}
+						{% endif %}
+					</ul>
+				</div>
+		</div>
+		<div class="send-message">
+			{% if room_details %}
+			<script>
+				roomname=document.getElementById('roomname').value
+				console.log("roomname : "+roomname)
+				createsocket(roomname)
+			</script>
+			<input type="text"  name="messagetext" id="messagetext" placeholder="Enter message" onsubmit="sendWebSocketMessage('{{ room_details.id }}','{{ request.user.id }}','{{ is_room }}','{{ is_private }}')">
+			<button  id="send-button" onclick="sendWebSocketMessage('{{ room_details.id }}','{{ request.user.id }}','{{ is_room }}','{{ is_private }}')">Send</button>
+			{% endif %}
+			{% if room_details1 %}
+			<script>
+				roomname='{{ room_details1.id }}';
+				console.log("roomname : "+roomname)
+				createsocket(roomname)
+			</script>
+			<input type="hidden" readonly value="{{ room_details1.id }}">
+			<input type="text"  name="messagetext" id="messagetext" placeholder="Enter message" onsubmit="sendWebSocketMessage('{{ room_details1.id }}','{{ request.user.id }}','{{ is_room }}','{{ is_private }}')">
+			<button  id="send-button" onclick="sendWebSocketMessage('{{ room_details1.id }}','{{ request.user.id }}','{{ is_room }}','{{ is_private }}')">Send</button>
+			{% endif %}
+		</div>
+	</body>
+	<script>
+		const search = document.querySelector('[name="search"]');
+		console.log(search);
+		search.addEventListener('keyup', (e) => {
+			if (e.code === 'Enter') {
+			const content = document.getElementById('search').value;
+			//const url = "{% url 'searchresult' %}?value=" + content + "&currentid={{ currentuser.id }}";
+			fetchresult(content);
+			}
+		});
+		const messagetext=document.querySelector('[name="messagetext"]')
+		const sendbutton=document.getElementById('send-button')
+		messagetext.addEventListener('keyup',(e)=>{
+			if(e.code==='Enter'){
+				sendbutton.click();
+			}
+		})
+		var fileInput = document.getElementById('id_photo_or_video');
+		var postImageDiv = document.querySelector('.postimage');
+		console.log("hello")
+		fileInput.addEventListener('click', function(event) {
+			console.log("in")
+			var file = event.target.files[0];
+			var imageUrl = URL.createObjectURL(file);
+	
+			var image = document.createElement('img');
+			image.src = imageUrl;
+			image.alt = 'Uploaded Image';
+			
+			// Clear any existing content in the postImageDiv
+			postImageDiv.innerHTML = '';
+	
+			// Append the new image to the postImageDiv
+			postImageDiv.appendChild(image);
+		});
+	</script>
+</html>

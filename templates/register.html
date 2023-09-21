@@ -1,0 +1,53 @@
+{% load static %}
+<html>
+    <head>
+        <title>Register</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{% static 'reg.css' %}">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <link rel="stylesheet" href="{% static 'custom_styles.css' %}">
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="center">
+            <h1>SignUp</h1>
+            <form action="" method="post" enctype="multipart/form-data" autocomplete="off" >
+                {% csrf_token %}
+                <div class="text_field">
+                    {{form.username}}
+                    <span></span>
+                    <label>Username</label>
+                    <p class="username-error"></p>
+                </div>
+                <div class="text_field">
+                    {{form.email}}
+                    <span></span>
+                    <label>Email</label>
+                    <p class="email-error"></p>
+                </div>
+                <div class="text_field">
+                    {{form.password}}
+                    <span></span>
+                    <label>Password</label>
+                    <p class="password-error"></p>
+                </div>
+                <div class="text_field">
+                    <label class="gen">Gender</label>
+                    <div class="gender">
+                        {{form.gender}}
+                    </div>
+                </div>
+                <div class="photo">
+                    {{form.profile_pic}}
+                </div>
+                <input type="Submit" value="Sign_up" name="reg_user">
+            </form>
+        </div>
+    </body>
+</html>

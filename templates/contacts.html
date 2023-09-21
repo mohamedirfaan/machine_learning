@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Message page</title>
+		<link rel="stylesheet" href="{% static 'message.css' %}">
+	</head>
+	<script>
+		const friend = localStorage.getItem('friend');
+		const members = localStorage.getItem('members');
+  		console.log(friend); 
+	</script>
+<body>
+	<center><h1>Hello , Welcome to my chat site ! {{request.user}}</h1></center>
+	<br>
+	{% if request.user.is_authenticated %}
+	<center> Logout the chat Page <a href = "logout">Logout</a></center>
+	{% endif %}
+	
+	<div id="contacts">
+		{% for x in friend %}
+			{% for j in members %}
+				{% ifequal j.id x.profile_id %}
+				<div class="part_contact">
+					<a href="{{j.id}}" class="image_links">
+					<img class="contacts1" src="{{j.profile_pic.url}}" alt="image not available" width="50px" height="50px" object-fit="cover" style="border-radius: 25px;">
+					<p> {{j.name}} </p> </a>
+				</div>
+				{% endifequal %}
+			{% endfor %}
+		{% endfor %}
+	</div>
+</body>
+</html>

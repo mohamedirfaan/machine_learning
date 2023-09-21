@@ -1,0 +1,218 @@
+{% load static %}
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  </head>
+  <body>
+    {{ request.user }}
+    <header class="header1">
+      <h1>LOGO</h1>
+    </header>
+
+
+    <div class="add-post-overlay" id="add-post-overlay">
+			<div class="add-post-manager" id="add-post-manager">
+        <button id="close_post" class="close_post">Close</button>
+				<div class="postimage">
+					
+				</div>
+				<form action="" method="post" enctype="multipart/form-data" autocomplete="off" >
+					{% csrf_token %}
+					<div class="posto">
+						{{ post_form.post_or_video }}
+					</div>
+					<div class="post_tags">
+						{{ post_form.tags }}
+					</div>
+					<button class="upload_photo_or_video" class="upload_photo_or_video" id="upload_photo_or_video" >Upload</button>
+				</form>
+			</div>
+		</div>
+		<div class="search-overlay" id="search-overlay">
+			<span></span>
+			<div>
+				<h1>search</h1>
+				<input class="search-field" type="text" name="search" id="search" placeholder="Enter a username">
+			</div>
+			<div class="result" id="result" >
+				<p>Result</p>
+			</div>
+		</div>
+		<div id="menu-overlay" class="menu-overlay">
+			<p>Menu</p>
+      {% if user.is_authenticated %}
+          <a class="links" href="logout">Logout</a>
+        {% else %}
+          <a class="links" href="login">Login</a>
+        {% endif %}
+        {% if not user.is_authenticated %}
+          <a class="links" href="register">Register</a>
+        {% endif %}
+		</div>
+
+
+		<div class="header">
+      <div class="header-contents">
+			<div class="home">
+				<button id="home-button" class="home-button"> 
+					<i class="fas fa-home image-button" id="home-button-image" ></i> Home
+				</button>
+			</div>
+			<div class="search">
+				<button class="search-button" id="search-button">
+					<i class="fas fa-search search-button" id="search-button-image"></i> <p>Search
+				</button>
+			</div>
+			<div class="add-post">
+				<button class="add-post-button" id="add-post-button">
+					<i class="fas fa-plus" id="add-post-button-image"></i> Post
+				</button>
+			</div>
+			<div class="explore">
+				<button class="explore-button" id="explore-button">
+					<i class="fas fa-compass" class="explore-button-image" ></i> Explore
+				</button>
+			</div>
+			<div class="menu">
+				<button id="menu-button" class="menu-button">
+					<i class="fas fa-bars bars" id="menu-button-image"></i> Menu
+				</button>
+			</div>
+        
+        {% if user.is_authenticated %}
+        <div class="profile-link">
+          <a href="profile/{{ currentuser.id }}" class="links">
+            <img class="user" src="{{ currentuser.profile_pic.url }}" alt="Profile Picture" width="50px" height="50px" object-fit="cover">
+            Profile
+          </a>
+        </div>
+        <div class="message-link">
+          <i class="message-icon fab fa-instagram"></i>
+          <a href="message" class="links">
+            Message
+          </a>
+        </div>
+        {% endif %}
+      </div>
+		</div>
+    <div class="res">
+      {% for i in posts %}
+        <div class="content">
+          <div class="image-content">
+            <img  class="post" src="{{ i.post_or_video.url }}" alt="not_found">
+            <div class="details">
+              <h3>{{ i.tags }}</h3>
+              <div class="comment_input">
+                <input id="comment_entry_{{ forloop.counter }}" name="comment_entry-{{ forloop.counter }}" type="text" placeholder="type a comment">
+                <button id="comment_post_button_{{ forloop.counter }}" name="comment_post_button-{{ forloop.counter }}" onclick="send_comment('{{ i.id }}', '{{ forloop.counter }}')">post</button>
+                <div class="comments">
+                  {% for comment in i.get_comments %}
+                    <div class="single_comment">
+                      <p>{{ comment.sender }}</p>
+                      <p>{{ comment }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    const search = document.querySelector('[name="search"]');
+		console.log(search);
+		search.addEventListener('keyup', (e) => {
+			if (e.code === 'Enter') {
+			const content = document.getElementById('search').value;
+			//const url = "{% url 'searchresult' %}?value=" + content + "&currentid={{ currentuser.id }}";
+			fetchresult(content);
+			}
+		});
+    var menuoverlaybutton = document.getElementById('menu-button');
+            var menuoverlay = document.getElementById('menu-overlay');
+        
+            document.addEventListener('click',function(event){
+                console.log("in");
+                close_post = document.getElementById('close_post')
+                post_photo_or_video=document.getElementById('id_post_or_video')
+                id_tags = document.getElementById('id_tags')
+                upload_photo_or_video=document.getElementById('upload_photo_or_video')
+
+                menuoverlaybutton1=document.getElementById('menu-button-image')
+                createRoom=document.getElementById('create-room')
+                searchbutton=document.getElementById('search-button');
+                searchoverlay=document.getElementById('search-overlay');
+                searchbuttonimage=document.getElementById('search-button-image');
+                var search = document.getElementById('search')
+
+                var post_overlay = document.getElementById('add-post-overlay')
+                var add_post_manager = document.getElementById('add-post-manager')
+                var add_post_button_image = document.getElementById('add-post-button-image')
+                var add_post_button = document.getElementById('add-post-button')
+                var homebuttonimage = document.getElementById('home-button-image')
+                var homebutton = document.getElementById('home-button')
+                console.log(event.target)
+                console.log(homebuttonimage)
+                if(event.target==menuoverlaybutton1||event.target==menuoverlaybutton)
+                {
+                    localStorage.setItem('menuoverlay','true')
+                    menuoverlay.style.display='flex';
+                }
+                else if(event.target==homebutton || event.target==homebuttonimage){
+                    console.log("redirecting")
+                    window.location.href='/index';
+                }
+                else if(event.target==close_post)
+                {
+                  post_overlay.style.display='none';
+                }
+                else if(event.target==upload_photo_or_video){
+                    console.log("inside if")
+                    const image = document.getElementById('id_post_or_video')
+                    console.log(image.files[0].name)
+                }
+                else if(event.target==add_post_button || event.target==add_post_button_image)
+                    post_overlay.style.display='flex';
+                else if(event.target==searchbutton || event.target==searchbuttonimage)
+                    searchoverlay.style.display='flex';
+                else if((event.target!=createRoom && event.target!=searchoverlay && event.target!=search &&
+                        event.target!=post_photo_or_video && event.target!=upload_photo_or_video && event.target!=add_post_manager &&
+                        event.target!=id_tags)){
+                          console.log('removing')
+                    menuoverlay.style.display='none';
+                    localStorage.removeItem('menuoverlay')
+                    searchoverlay.style.display='none';
+                }
+            })
+    function send_comment(id,counter){
+      message=document.getElementById('comment_entry_'+counter)
+      console.log("send comment");
+      payload={
+          "csrfmiddlewaretoken":"{{ csrf_token }}",
+          "post_id":id,
+          "comment":message.value,
+      }
+      payload['response']=""
+      $.ajax({
+          type:"POST",
+          dataType:"json",
+          url:"{% url 'send-comment' %}",
+          data:payload,
+          success:function(response){
+            location.reload();
+            console.log("comment updated");
+          },
+          error:function(){
+            console.log("there has been some error in updating comment");
+          }
+      })
+  }
+  
+  </script>
+</html>
