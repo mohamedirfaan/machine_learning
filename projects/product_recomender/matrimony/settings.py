@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'soulmates',
+    ''''soulmates','''
     'channels',
     'recomender'
 ]
@@ -101,7 +101,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL='soulmates.Member'
+#AUTH_USER_MODEL='soulmates.Member'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
